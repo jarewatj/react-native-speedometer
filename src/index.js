@@ -7,17 +7,102 @@ import {
   Animated,
   Easing,
   Text,
+  StyleSheet,
+  Dimensions,
 } from 'react-native';
 import PropTypes from 'prop-types';
 
 // Utils
-import calculateDegreeFromLabels from './utils/calculate-degree-from-labels';
-import calculateLabelFromValue from './utils/calculate-label-from-value';
-import limitValue from './utils/limit-value';
-import validateSize from './utils/validate-size';
+function calculateDegreeFromLabels(degree, labels) {
+  const perLevelDegree = (degree) / (labels.length);
+  return perLevelDegree;
+}
+function calculateLabelFromValue(value, labels, minValue, maxValue) {
+  const currentValue = (value - minValue) / (maxValue - minValue);
+  const currentIndex = Math.round((labels.length - 1) * currentValue);
+  const label = labels[currentIndex];
+  return label;
+}
+function limitValue(value, minValue, maxValue, allowedDecimals) {
+  let currentValue = 0;
+  if (!isNaN(value)) {
+    if (!isNaN(allowedDecimals) && allowedDecimals > 0) {
+      currentValue = parseFloat(value).toFixed(allowedDecimals < 4 ? parseInt(allowedDecimals) : 4);
+    } else {
+      currentValue = parseInt(value);
+    }
+  }
+  return Math.min(Math.max(currentValue, minValue), maxValue);
+}
+
+function validateSize(current, original) {
+  let currentSize = original;
+  if (!isNaN(current)) {
+    currentSize = parseInt(current);
+  }
+  return currentSize;
+}
+
 
 // Style
-import style, { width as deviceWidth } from './style';
+const width = Dimensions.get('window').width;
+const style = StyleSheet.create({
+  wrapper: {
+    marginVertical: 5,
+    alignSelf: 'center',
+  },
+  // Circular Container
+  circleWrapper: {
+    overflow: 'hidden',
+  },
+  outerCircle: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderColor: '#ffffff',
+    backgroundColor: '#e6e6e6',
+  },
+  halfCircle: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  imageWrapper: {
+    position: 'absolute',
+    left: 0,
+    zIndex: 10,
+  },
+  image: {
+    resizeMode: 'stretch',
+    height: width - 20,
+    width: width - 20,
+  },
+  innerCircle: {
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    width: width * 0.6,
+    height: (width / 2) * 0.6,
+    borderTopLeftRadius: width / 2 - 10,
+    borderTopRightRadius: width / 2 - 10,
+  },
+  labelWrapper: {
+    marginVertical: 5,
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  labelNote: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
 
 // eslint-disable-next-line react/prefer-stateless-function
 class Speedometer extends Component {
@@ -67,7 +152,7 @@ class Speedometer extends Component {
       outputRange: ['-90deg', '90deg'],
     });
 
-    const currentSize = validateSize(size, deviceWidth - 20);
+    const currentSize = validateSize(size, width - 20);
     return (
       <View style={[style.wrapper, {
         width: currentSize,
