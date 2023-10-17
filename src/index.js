@@ -167,8 +167,10 @@ class Speedometer extends Component {
         }, outerCircleStyle]}
         >
           {labels.map((level, index) => {
+            const startDegree = 90 + (level.minValue == 0 ? 0 : ((((level.minValue / maxValue) * 180))));
+            const endDegree = 90 + (((level.maxValue / maxValue) * 180));
             const circleDegree = 90 + (index * perLevelDegree);
-            return (
+            return ([
               <View
                 key={level.name}
                 style={[style.halfCircle, {
@@ -178,26 +180,44 @@ class Speedometer extends Component {
                   borderRadius: currentSize / 2,
                   transform: [
                     { translateX: currentSize / 4 },
-                    { rotate: `${circleDegree}deg` },
+                    { rotate: `${!isNaN(level.maxValue) && !isNaN(level.minValue) ? startDegree : circleDegree}deg` },
                     { translateX: (currentSize / 4 * -1) },
                   ],
                 }, halfCircleStyle]}
-              />
+              />,
+              (!isNaN(level.maxValue) && !isNaN(level.minValue) ?
+                <View
+                  key={level.name + index}
+                  style={[style.halfCircle, {
+                    backgroundColor: '#e6e6e6',
+                    width: currentSize / 2,
+                    height: currentSize,
+                    borderRadius: currentSize / 2,
+                    transform: [
+                      { translateX: currentSize / 4 },
+                      { rotate: `${endDegree}deg` },
+                      { translateX: (currentSize / 4 * -1) },
+                    ],
+                  }, halfCircleStyle]}
+                />
+                : <View />
+              )
+            ]
             );
           })}
           <Animated.View style={[style.imageWrapper,
-            {
-              top: -(currentSize / 15),
-              transform: [{ rotate }],
-            },
+          {
+            top: -(currentSize / 15),
+            transform: [{ rotate }],
+          },
             imageWrapperStyle]}
           >
             <Image
               style={[style.image,
-                {
-                  width: currentSize,
-                  height: currentSize,
-                }, imageStyle]}
+              {
+                width: currentSize,
+                height: currentSize,
+              }, imageStyle]}
               source={needleImage}
             />
           </Animated.View>
